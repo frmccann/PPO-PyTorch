@@ -8,7 +8,8 @@ def main():
     env_name = "Problem2_new"
     model_name='Problem2_new'
     render = False
-    solved_reward = 1000         # stop training if avg_reward > solved_reward
+    plot_results=True
+    solved_reward = 100         # stop training if avg_reward > solved_reward
     log_interval = 25           # print avg reward in the interval
     max_episodes = 250        # max training episodes
     max_timesteps = 1500        # max timesteps in one episode
@@ -103,18 +104,31 @@ def main():
                 running_reward = 0
                 avg_length = 0
 
-    avg_rewards=rewards[0]
-    for i,reward in enumerate(rewards):
-        if i==1:
-            continue
-        else:
-            avg_rewards=[sum(x) for x in zip(avg_rewards, reward)]
-    avg_rewards=[x / len(rewards) for x in avg_rewards]
-    plt.plot(total_episodes[0][1:],avg_rewards[1:])
-    plt.xlabel('Elapsed Episodes')
-    plt.ylabel('Avg Reward over Episode')
-    plt.title('New RF Avg Performance Over 3 seeds')
-    plt.show()
+
+    if plot_results==True:
+        plt.plot(total_episodes[0][1:],rewards[0][1:])
+        plt.plot(total_episodes[1][1:],rewards[1][1:])
+        plt.plot(total_episodes[2][1:],rewards[2][1:])
+        plt.xlabel('Elapsed Episodes')
+        plt.ylabel('Avg Reward over Episode')
+        plt.title('Old RF  Performance Over 3 seeds')
+        plt.show()
+
+        avg_rewards=rewards[0]
+        for i,reward in enumerate(rewards):
+            if i==0:
+                continue
+            else:
+                avg_rewards=[sum(x) for x in zip(avg_rewards, reward)]
+        avg_rewards=[x / len(rewards) for x in avg_rewards]
+
+        plt.plot(total_episodes[0][1:],avg_rewards[1:])
+        plt.xlabel('Elapsed Episodes')
+        plt.ylabel('Avg Reward over Episode')
+        plt.title('Old RF Avg Performance Over 3 seeds')
+        plt.show()
+
+
 
     
 if __name__ == '__main__':

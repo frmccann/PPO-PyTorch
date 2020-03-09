@@ -91,11 +91,12 @@ class PusherEnv:
 		goal_y=self.goal[1]
 
 		object_goal_penalty=((goal_x-obj_x)**2+(goal_y-obj_y)**2)
-		# print('object goal penalty:',object_goal_penalty)
-		proximity_penalty=-0.5 if (arm_x-obj_x)**2+(arm_y-obj_y)**2 >= 0.05 else 0
-		goal_state=50 if object_goal_penalty<=0.005**2 else 0
+		# proximity_penalty= (-0.5) if (arm_x-obj_x)**2+(arm_y-obj_y)**2 >= (0.05)**2 else 0
+		proximity_penalty= (arm_x-obj_x)**2+(arm_y-obj_y)**2
+		# goal_state=50 if object_goal_penapty<0.025**2 else 0
+		goal_state=10 if object_goal_penalty <= 0.025**2 else 0
 
-		return proximity_penalty-object_goal_penalty+goal_state
+		return -(0.5)*proximity_penalty-object_goal_penalty+goal_state
 
 	def _get_obs(self):
 		gripper_pos = self.robot.arm.get_ee_pose()[0]

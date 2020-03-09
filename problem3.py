@@ -7,8 +7,9 @@ def main():
     ############## Hyperparameters ##############
     env_name = "Problem3-v1"
     model_name='problem_3_v3'
+    plot_results=True
     render = False
-    solved_reward = 100         # stop training if avg_reward > solved_reward
+    solved_reward = 200         # stop training if avg_reward > solved_reward
     log_interval = 50           # print avg reward in the interval
     max_episodes = 4000        # max training episodes
     max_timesteps = 1500        # max timesteps in one episode
@@ -86,7 +87,7 @@ def main():
             # stop training if avg_reward > solved_reward
             if running_reward > (log_interval*solved_reward):
                 print("########## Solved! ##########")
-                torch.save(ppo.policy.state_dict(), './models/'+model_name+'.pth')
+                torch.save(ppo.policy.state_dict(), './models/solved_'+model_name+'.pth')
                 break
             
             # save every 10 episodes
@@ -103,18 +104,28 @@ def main():
                 running_reward = 0
                 avg_length = 0
 
-    avg_rewards=rewards[0]
-    # for i,reward in enumerate(rewards):
-    #     if i==1:
-    #         continue
-    #     else:
-    #         avg_rewards=[sum(x) for x in zip(avg_rewards, reward)]
-    # avg_rewards=[x / len(rewards) for x in avg_rewards]
-    plt.plot(total_episodes[0][1:],avg_rewards[1:])
-    plt.xlabel('Elapsed Episodes')
-    plt.ylabel('Avg Reward over Episode')
-    plt.title('New RF Avg Performance Over 3 seeds')
-    plt.show()
+    if plot_results==True:
+        plt.plot(total_episodes[0][1:],rewards[0][1:])
+        plt.plot(total_episodes[1][1:],rewards[1][1:])
+        plt.plot(total_episodes[2][1:],rewards[2][1:])
+        plt.xlabel('Elapsed Episodes')
+        plt.ylabel('Avg Reward over Episode')
+        plt.title('Pusher Performance Over 3 seeds')
+        plt.show()
+
+        avg_rewards=rewards[0]
+        for i,reward in enumerate(rewards):
+            if i==0:
+                continue
+            else:
+                avg_rewards=[sum(x) for x in zip(avg_rewards, reward)]
+        avg_rewards=[x / len(rewards) for x in avg_rewards]
+
+        plt.plot(total_episodes[0][1:],avg_rewards[1:])
+        plt.xlabel('Elapsed Episodes')
+        plt.ylabel('Avg Reward over Episode')
+        plt.title('Pusher Avg Performance Over 3 seeds')
+        plt.show()
 
     
 if __name__ == '__main__':

@@ -10,14 +10,14 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def test():
     ############## Hyperparameters ##############
-    env_name = 'solved_Problem1'
-    env = ReacherEnv()
+    env_name = 'solved_problem_3_v4'
+    env = PusherEnv()
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]
     
     n_episodes = 1          # num of episodes to run
-    max_timesteps = 4000    # max timesteps in one episode
-    render = False           # render the environment
+    max_timesteps = 1500    # max timesteps in one episode
+    render = True           # render the environment
     save_gif = True        # png images are saved in gif folder
     
     # filename and directory to load model from
@@ -36,7 +36,7 @@ def test():
     memory = Memory()
     ppo = PPO(state_dim, action_dim, action_std, lr, betas, gamma, K_epochs, eps_clip)
     ppo.policy_old.load_state_dict(torch.load(directory+filename))
-    out = cv2.VideoWriter('./p1_video/final_eval.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (640,480)) 
+    out = cv2.VideoWriter('./p3_video/final_eval_v2.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (640,480)) 
     robot=env.robot
     robot_base = robot.arm.robot_base_pos
     robot.cam.setup_camera(focus_pt=robot_base, dist=3, yaw=55, pitch=-30, roll=0)

@@ -89,7 +89,7 @@ class ReacherWallEnv:
 		wall_pos=(0.5*self.goal + 0.5*self.init)
 		# print(self.robot.pb_client.get_body_state(self.wall_id))
 
-		wall_penalty=-1 if ((0.6-x)**2+(y)**2) <= .17**2 else 0
+		wall_penalty=-1 if ((0.6-x)**2+(y)**2) <= .1**2 else 0
 		wall_penalty=0
 		goal_state=50 if (goal_x-x)**2+(goal_y-y)**2<=0.005**2 else 0
 		# if self.prev_state[0]:
