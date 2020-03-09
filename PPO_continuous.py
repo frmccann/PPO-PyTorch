@@ -3,6 +3,8 @@ import torch.nn as nn
 from torch.distributions import MultivariateNormal
 import gym
 import numpy as np
+import cv2
+from reacher_wall import *
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -75,13 +77,14 @@ class ActorCritic(nn.Module):
         return action_logprobs, torch.squeeze(state_value), dist_entropy
 
 class PPO:
-    def __init__(self, state_dim, action_dim, action_std, lr, betas, gamma, K_epochs, eps_clip):
+    def __init__(self, state_dim, action_dim, action_std, lr, betas, gamma, K_epochs, eps_clip,c1=0.5,c2=0.01):
         self.lr = lr
         self.betas = betas
         self.gamma = gamma
         self.eps_clip = eps_clip
         self.K_epochs = K_epochs
-        
+        self.c1=c1
+        self.c2=c2
         self.policy = ActorCritic(state_dim, action_dim, action_std).to(device)
         self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=lr, betas=betas)
         
@@ -115,33 +118,42 @@ class PPO:
         
         # Optimize policy for K epochs:
         for _ in range(self.K_epochs):
-            # Evaluating old actions and values :
+            #From our critic we have the logprobabilities of taking that action from the state, state value, and dist entropy
             logprobs, state_values, dist_entropy = self.policy.evaluate(old_states, old_actions)
             
-            # Finding the ratio (pi_theta / pi_theta__old):
-            ratios = torch.exp(logprobs - old_logprobs.detach())
+            ## first we want to calculate ration between old policy and new policy
+            ##we have log probabilities, convert them to regular ones with exp function
 
-            # Finding Surrogate Loss:
-            advantages = rewards - state_values.detach()   
-            surr1 = ratios * advantages
-            surr2 = torch.clamp(ratios, 1-self.eps_clip, 1+self.eps_clip) * advantages
-            loss = -torch.min(surr1, surr2) + 0.5*self.MseLoss(state_values, rewards) - 0.01*dist_entropy
+            r_t_theta=torch.exp(logprobs)/(torch.exp(old_logprobs.detach()))
             
-            # take gradient step
-            self.optimizer.zero_grad()
-            loss.mean().backward()
+            ##next find advantages, chose to use expected rewards-statevalues(as baseline like V(s))
+            advantages = rewards - state_values.detach()
+
+            ## took the clip function from this article on medium https://medium.com/@jonathan_hui/rl-proximal-policy-optimization-ppo-explained-77f014ec3f12
+            clipped_loss=torch.min(r_t_theta*advantages,torch.clamp(r_t_theta,1-self.eps_clip,1+self.eps_clip)*advantages)
+            ##Vf loss is are value function at the current state - a target value function, we can base the target values of our reward function and use MSE loss
+
+            vf_loss=self.MseLoss(state_values, rewards)
+
+            ##the entropy bonus is derived from the distribution entropy that was already calculate in this repository
+            entropy_bonus=dist_entropy
+            
+            total_loss=(-1)*(clipped_loss-self.c1*vf_loss+self.c2*entropy_bonus)
+            ## Call the gradient update step optimizing wrt to theta using ADAM/SGD!
+            total_loss.mean().backward()
             self.optimizer.step()
+            self.optimizer.zero_grad()
             
-        # Copy new weights into old policy:
+        # update weights:
         self.policy_old.load_state_dict(self.policy.state_dict())
         
 def main():
     ############## Hyperparameters ##############
-    env_name = "BipedalWalker-v2"
+    env_name = "Problem2-v3"
     render = False
-    solved_reward = 300         # stop training if avg_reward > solved_reward
+    solved_reward = 0         # stop training if avg_reward > solved_reward
     log_interval = 20           # print avg reward in the interval
-    max_episodes = 10000        # max training episodes
+    max_episodes = 1000        # max training episodes
     max_timesteps = 1500        # max timesteps in one episode
     
     update_timestep = 4000      # update policy every n timesteps
@@ -157,7 +169,7 @@ def main():
     #############################################
     
     # creating environment
-    env = gym.make(env_name)
+    env = ReacherWallEnv()
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]
     
@@ -175,7 +187,10 @@ def main():
     running_reward = 0
     avg_length = 0
     time_step = 0
-    
+    out = cv2.VideoWriter('./gif/problem2_no_noise_4.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (640,480)) 
+    robot=env.robot
+    robot_base = robot.arm.robot_base_pos
+    robot.cam.setup_camera(focus_pt=robot_base, dist=3, yaw=55, pitch=-30, roll=0)
     # training loop
     for i_episode in range(1, max_episodes+1):
         state = env.reset()
@@ -188,7 +203,9 @@ def main():
             # Saving reward and is_terminals:
             memory.rewards.append(reward)
             memory.is_terminals.append(done)
-            
+            if i_episode%100==0:
+                img = robot.cam.get_images(get_rgb=True, get_depth=False)[0]
+                out.write(np.array(img)) 
             # update if its time
             if time_step % update_timestep == 0:
                 ppo.update(memory)
@@ -198,19 +215,22 @@ def main():
             if render:
                 env.render()
             if done:
+                print('hit done?')
                 break
         
         avg_length += t
-        
+        if i_episode%100==0:
+            out.release()
+            out = cv2.VideoWriter('./gif/problem2_no_noise_4'+str(i_episode)+'.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (640,480))
         # stop training if avg_reward > solved_reward
         if running_reward > (log_interval*solved_reward):
             print("########## Solved! ##########")
-            torch.save(ppo.policy.state_dict(), './PPO_continuous_solved_{}.pth'.format(env_name))
+            torch.save(ppo.policy.state_dict(), './PPO_continuous_solved_p2{}.pth'.format(env_name))
             break
         
-        # save every 500 episodes
-        if i_episode % 500 == 0:
-            torch.save(ppo.policy.state_dict(), './PPO_continuous_{}.pth'.format(env_name))
+        # save every 10 episodes
+        if i_episode % 35 == 0:
+            torch.save(ppo.policy.state_dict(), './PPO_continuous_p2{}.pth'.format(env_name))
             
         # logging
         if i_episode % log_interval == 0:
@@ -220,7 +240,6 @@ def main():
             print('Episode {} \t Avg length: {} \t Avg reward: {}'.format(i_episode, avg_length, running_reward))
             running_reward = 0
             avg_length = 0
-            
 if __name__ == '__main__':
     main()
     
