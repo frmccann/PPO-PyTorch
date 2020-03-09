@@ -19,7 +19,7 @@ The instructions to run this part of the PSET are very similar to those for prob
 
 You can create a video of the model in the same way as in problem 1, by running the eval_model.py script and changing the loaded enviornment to load reacherWallEnv instead of reacherEnv.
 
-##Problem 3 instructions
+## Problem 3 instructions
 The instructions to run this part of the PSET are very similar to those for problem 1. Do the same thing but with the problem2.py file. 
 
 You can create a video of the model in the same way as in problem 1, by running the eval_model.py script and changing the loaded enviornment to load reacherWallEnv instead of pusherEnv.
