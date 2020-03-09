@@ -1,14 +1,3 @@
-# PPO-PyTorch
-Minimal PyTorch implementation of Proximal Policy Optimization with clipped objective for OpenAI gym environments.
-
-## Usage
-
-- To test a preTrained network : run `test.py` or `test_continuous.py`
-- To train a new network : run `PPO.py` or `PPO_continuous.py`
-- All the hyperparameters are in the `PPO.py` or `PPO_continuous.py` file
-- If you are trying to train it on a environment where action dimension = 1, make sure to check the tensor dimensions in the update function of PPO class, since I have used `torch.squeeze()` quite a few times. `torch.squeeze()` squeezes the tensor such that there are no dimensions of length = 1 ([more info](https://pytorch.org/docs/stable/torch.html?highlight=torch%20squeeze#torch.squeeze)).
-- Number of actors for collecting experience = 1. This could be easily changed by creating multiple instances of ActorCritic networks in the PPO class and using them to collect experience (like A3C and standard PPO).
-
 ## Dependencies
 Trained and tested on:
 ```
@@ -19,14 +8,21 @@ gym 0.10.8
 Pillow 5.3.0
 ```
 
-## Results
+## Problem 1 instructions
+In order to train this model simply run the problem1.py script and specify the location to save the trained weights. There are a bunch of hyperparamters you can mess around with but the ones currently set are the ones I trained the model with. If you want to plot results you can change the plots hyperparamater to True
 
-PPO Discrete LunarLander-v2 (1200 episodes)           |  PPO Continuous BipedalWalker-v2 (4000 episodes)
-:-------------------------:|:-------------------------:
-![](https://github.com/nikhilbarhate99/PPO-PyTorch/blob/master/gif/PPO_LunarLander-v2.gif) |  ![](https://github.com/nikhilbarhate99/PPO-PyTorch/blob/master/gif/PPO_BipedalWalker-v2.gif)
+In addittion if you wish to create a video of the model in action run the eval_model.py script and specifcy a location to save the video and the path from which to save the model you just trained 
+
+## Problem 2 instructions 
+
+The instructions to run this part of the PSET are very similar to those for problem 1. Do the same thing but with the problem2.py file. However, if you wish to change the reward function to the one used for problem 1 you will have to go into the reacher_wall file and uncomment the line in the reward function that sets the wall_penalty to 0. 
+
+You can create a video of the model in the same way as in problem 1, by running the eval_model.py script and changing the loaded enviornment to load reacherWallEnv instead of reacherEnv.
+
+## Problem 3 instructions
+The instructions to run this part of the PSET are very similar to those for problem 1. Do the same thing but with the problem2.py file. 
+
+You can create a video of the model in the same way as in problem 1, by running the eval_model.py script and changing the loaded enviornment to load reacherWallEnv instead of pusherEnv.
 
 
-## References
 
-- PPO [paper](https://arxiv.org/abs/1707.06347)
-- [OpenAI Spinning up](https://spinningup.openai.com/en/latest/)
