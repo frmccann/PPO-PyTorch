@@ -7,7 +7,7 @@ def main():
     ############## Hyperparameters ##############
     env_name = "Problem3-v1"
     model_name='problem_3_v3'
-    plot_results=True
+    plot_results=False
     render = False
     solved_reward = 200         # stop training if avg_reward > solved_reward
     log_interval = 50           # print avg reward in the interval
@@ -83,16 +83,16 @@ def main():
             avg_length += t
             if i_episode%record_step==0 and record_video:
                 out.release()
-                out = cv2.VideoWriter('./p3_video/problem3_'+str(seed_num)+str(i_episode)+'.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (640,480))
+                out = cv2.VideoWriter('./problem3_'+str(seed_num)+str(i_episode)+'.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (640,480))
             # stop training if avg_reward > solved_reward
             if running_reward > (log_interval*solved_reward):
                 print("########## Solved! ##########")
-                torch.save(ppo.policy.state_dict(), './models/solved_'+model_name+'.pth')
+                torch.save(ppo.policy.state_dict(), './solved_'+model_name+'.pth')
                 break
             
             # save every 10 episodes
             if i_episode % 500 == 0:
-                torch.save(ppo.policy.state_dict(), './models/'+model_name+'.pth')
+                torch.save(ppo.policy.state_dict(), './'+model_name+'.pth')
                 
             # logging
             if i_episode % log_interval == 0:

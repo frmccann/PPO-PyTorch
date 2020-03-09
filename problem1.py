@@ -7,7 +7,7 @@ def main():
     ############## Hyperparameters ##############
     env_name = "Problem1"
     model_name='Problem1'
-    plot_results=True
+    plot_results=False
     render = False
     solved_reward = 200         # stop training if avg_reward > solved_reward
     log_interval = 35           # print avg reward in the interval

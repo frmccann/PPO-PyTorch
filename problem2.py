@@ -5,10 +5,10 @@ from reacher_wall import *
 from pusher import *
 def main():
     ############## Hyperparameters ##############
-    env_name = "Problem2_new"
-    model_name='Problem2_new'
+    env_name = "Problem2"
+    model_name='Problem2'
     render = False
-    plot_results=True
+    plot_results=False
     solved_reward = 100         # stop training if avg_reward > solved_reward
     log_interval = 25           # print avg reward in the interval
     max_episodes = 250        # max training episodes
@@ -83,16 +83,16 @@ def main():
             avg_length += t
             if i_episode%video_step==0 and record_video:
                 out.release()
-                out = cv2.VideoWriter('./p2_video/problem2_'+str(i_episode)+'.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (640,480))
+                out = cv2.VideoWriter('./problem2_'+str(i_episode)+'.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (640,480))
             # stop training if avg_reward > solved_reward
             if running_reward > (log_interval*solved_reward):
                 print("########## Solved! ##########")
-                torch.save(ppo.policy.state_dict(), './models/'+model_name+'.pth')
+                torch.save(ppo.policy.state_dict(), './'+model_name+'.pth')
                 break
             
             # save every 10 episodes
             if i_episode % 50 == 0:
-                torch.save(ppo.policy.state_dict(), './models/'+model_name+'.pth')
+                torch.save(ppo.policy.state_dict(), './'+model_name+'.pth')
                 
             # logging
             if i_episode % log_interval == 0:

@@ -10,7 +10,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def test():
     ############## Hyperparameters ##############
-    env_name = 'solved_problem_3_v4'
+    env_name = 'solved_problem_3'
     env = PusherEnv()
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]
@@ -22,7 +22,7 @@ def test():
     
     # filename and directory to load model from
     filename = env_name+ ".pth"
-    directory = "./models/"
+    directory = "./"
 
     action_std = 0.5        # constant std for action distribution (Multivariate Normal)
     K_epochs = 80           # update policy for K epochs
@@ -36,7 +36,7 @@ def test():
     memory = Memory()
     ppo = PPO(state_dim, action_dim, action_std, lr, betas, gamma, K_epochs, eps_clip)
     ppo.policy_old.load_state_dict(torch.load(directory+filename))
-    out = cv2.VideoWriter('./p3_video/final_eval_v2.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (640,480)) 
+    out = cv2.VideoWriter('./final_eval_p3.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (640,480)) 
     robot=env.robot
     robot_base = robot.arm.robot_base_pos
     robot.cam.setup_camera(focus_pt=robot_base, dist=3, yaw=55, pitch=-30, roll=0)
