@@ -7,6 +7,8 @@ NumPy 1.15.3
 gym 0.10.8
 Pillow 5.3.0
 ```
+
+The code is based off of this repository https://github.com/nikhilbarhate99/PPO-PyTorch. I simply deleted the policy gradient and clipping parts and rewrote them
 ## WriteUp
 Please look at the attached PDF for answers to the questions and more info. 
 
